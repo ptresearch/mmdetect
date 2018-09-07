@@ -17,26 +17,26 @@ FULLURL = LSPCIURL + PCIUTILSFILENAMEEX
 def GetPCIUtils():
     pciUtilsReq = requests.get(FULLURL)
     if pciUtilsReq.status_code != requests.codes.ok:
-        print "[-] Error: Cannot download PCIUtils"
+        print("[-] Error: Cannot download PCIUtils")
         sys.exit(-1)
-    print "[+] PCIUtils downloaded successfully"
+    print("[+] PCIUtils downloaded successfully")
     return pciUtilsReq.content
 
 def FindMEDevice(fileName):
     PCIREGEX = r'(?P<pci_bdf>[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F])\ (?P<pci_class>[\w+\ \&\[\]\:\(\)\&\-\/]+)\: (?P<pci_name>[\w+\ \&\[\]\:\(\)\&\-\/]+)'
     try:
         lspci = subprocess.Popen([fileName],  stdout=subprocess.PIPE)
-    except OSError, e:
-        print "[-] Error: lspci not found"
+    except OSError(e):
+        print("[-] Error: lspci not found")
         sys.exit(-1)
     output = lspci.communicate()[0]
     if lspci.returncode != 0:
-        print "[-] Error: Couldn't run lspci (try again as admin)"
+        print("[-] Error: Couldn't run lspci (try again as admin)")
         sys.exit(-1)
     param = output.splitlines()
     pciRegExp = re.compile(PCIREGEX)
     for i in param:
-        pciDevDesc = pciRegExp.search(i)
+        pciDevDesc = pciRegExp.search(str(i))
         if pciDevDesc.group("pci_class") == "Communication controller":
                if pciDevDesc.group("pci_name").find("ME Interface")!=-1 or (pciDevDesc.group("pci_name").find("HECI")!=-1 ):
                     return pciDevDesc.group("pci_bdf")
@@ -47,12 +47,12 @@ def MeGetStatus(bdf, fileName):
     lspci = subprocess.Popen([fileName, "-s", bdf, "-xxx"],  stdout=subprocess.PIPE)
     output = lspci.communicate()[0]
     if lspci.returncode != 0:
-        print "[-] Error: Couldn't run lspci"
+        print("[-] Error: Couldn't run lspci")
         sys.exit(-1)
     pciRegExp = re.compile(PCIREGEX)
-    regexp = pciRegExp.search(output)
+    regexp = pciRegExp.search(str(output))
     if (regexp == None):
-        print "[-] Error: Couldn't get extended register (try again as root)"
+        print("[-] Error: Couldn't get extended register (try again as root)")
         sys.exit(-1)
     val = regexp.group("me_fwsts1")
     return (int(val) & 1 << 4) != 0
@@ -70,17 +70,18 @@ lspciName = {
 def CheckPlatform():
    osType = platform.system()
    if not  osType in lspciName:
-        print "[-] Error: Sorry, your platform isn't supported (",osType,")"
+        print("[-] Error: Sorry, your platform isn't supported (%s)" % osType)
         sys.exit(-1)
    return osType
 
 def InstallPCIUtils():
     if os.path.isfile(lspciName["Windows"][0]):
-        print "[+] PCIUtils found"
+        print("[+] PCIUtils found")
         return "."
-    ans = raw_input("[!] PCIUtils not found. Do you want install automatically (Y/N) [N]")
+    print("[!] PCIUtils not found. Do you want install automatically (Y/N) [N]")
+    ans = sys.stdin.read(1)
     if ans!="Y" and ans!="y":
-        print "[!] Please install PCIUtils manually and try again"
+        print("[!] Please install PCIUtils manually and try again")
         sys.exit(-1)
     pciUtilsZip = GetPCIUtils()
     pciUtilsDir =tempfile.mkdtemp()
@@ -95,7 +96,7 @@ def InstallPCIUtils():
 
     os.remove(pciUtilsFileName)
 
-    print "[+] PCIUtils extracted successfully"
+    print("[+] PCIUtils extracted successfully")
     return os.path.join(pciUtilsDir,PCIUTILSFILENAME)
 
 def main():
@@ -111,16 +112,15 @@ def main():
 
     meBDF = FindMEDevice(lspciBin)
     if meBDF == "":
-        print "[-] Error: ME device not found (hidden)"
+        print("[-] Error: ME device not found (hidden)")
         sys.exit(-1)
 
-    print "[+] Intel ME device found:", meBDF
-    print "\n"
+    print("[+] Intel ME device found: %s\n" % meBDF)
 
     if MeGetStatus(meBDF, lspciBin):
-        print "[!] THIS SYSTEM IS VULNERABLE!!!"
+        print("[!] THIS SYSTEM IS VULNERABLE!!!")
     else:
-        print "[+] This system isn't vulnerable."
+        print("[+] This system isn't vulnerable.")
 
 if __name__=="__main__":
     main()
