@@ -18,7 +18,7 @@ def GetPCIUtils():
     pciUtilsReq = requests.get(FULLURL)
     if pciUtilsReq.status_code != requests.codes.ok:
         print "[-] Error: Cannot download PCIUtils"
-        exit(-1)
+        sys.exit(-1)
     print "[+] PCIUtils downloaded successfully"
     return pciUtilsReq.content
 
@@ -28,11 +28,11 @@ def FindMEDevice(fileName):
         lspci = subprocess.Popen([fileName],  stdout=subprocess.PIPE)
     except OSError, e:
         print "[-] Error: lspci not found"
-        exit(-1)
+        sys.exit(-1)
     output = lspci.communicate()[0]
     if lspci.returncode != 0:
         print "[-] Error: Couldn't run lspci (try again as admin)"
-        exit(-1)
+        sys.exit(-1)
     param = output.splitlines()
     pciRegExp = re.compile(PCIREGEX)
     for i in param:
@@ -48,12 +48,12 @@ def MeGetStatus(bdf, fileName):
     output = lspci.communicate()[0]
     if lspci.returncode != 0:
         print "[-] Error: Couldn't run lspci"
-        exit(-1)
+        sys.exit(-1)
     pciRegExp = re.compile(PCIREGEX)
     regexp = pciRegExp.search(output)
     if (regexp == None):
         print "[-] Error: Couldn't get extended register (try again as root)"
-        exit(-1)
+        sys.exit(-1)
     val = regexp.group("me_fwsts1")
     return (int(val) & 1 << 4) != 0
 
@@ -71,7 +71,7 @@ def CheckPlatform():
    osType = platform.system()
    if not  osType in lspciName:
         print "[-] Error: Sorry, your platform isn't supported (",osType,")"
-        exit(-1)
+        sys.exit(-1)
    return osType
 
 def InstallPCIUtils():
@@ -81,10 +81,10 @@ def InstallPCIUtils():
     ans = raw_input("[!] PCIUtils not found. Do you want install automatically (Y/N) [N]")
     if ans!="Y" and ans!="y":
         print "[!] Please install PCIUtils manually and try again"
-        exit(-1)
+        sys.exit(-1)
     pciUtilsZip = GetPCIUtils()
     pciUtilsDir =tempfile.mkdtemp()
-    pciUtilsFileName = pciUtilsDir+"/pciutils.zip"
+    pciUtilsFileName = os.path.join(pciUtilsDir,"pciutils.zip")
     pciUtilsFile = open(pciUtilsFileName, "wb")
     pciUtilsFile.write(pciUtilsZip)
     pciUtilsFile.close()
@@ -96,7 +96,7 @@ def InstallPCIUtils():
     os.remove(pciUtilsFileName)
 
     print "[+] PCIUtils extracted successfully"
-    return pciUtilsDir+"/"+PCIUTILSFILENAME
+    return os.path.join(pciUtilsDir,PCIUTILSFILENAME)
 
 def main():
     lspciPath =  ParseArguments()
@@ -107,12 +107,12 @@ def main():
     lspciBin = lspciName[osType][0]
 
     if lspciPath!="":
-        lspciBin = lspciPath+"/"+lspciBin
+        lspciBin = os.path.join(lspciPath,lspciBin)
 
     meBDF = FindMEDevice(lspciBin)
     if meBDF == "":
         print "[-] Error: ME device not found (hidden)"
-        exit(-1)
+        sys.exit(-1)
 
     print "[+] Intel ME device found:", meBDF
     print "\n"
