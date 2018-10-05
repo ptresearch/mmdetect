@@ -55,7 +55,7 @@ def MeGetStatus(bdf, fileName):
         print("[-] Error: Couldn't get extended register (try again as root)")
         sys.exit(-1)
     val = regexp.group("me_fwsts1")
-    return (int(val) & 1 << 4) != 0
+    return (int(val, 16) & 1 << 4) != 0
 
 def ParseArguments():
     parser = argparse.ArgumentParser(description='Manufecturing mode detection tool.')
