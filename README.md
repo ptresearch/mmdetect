@@ -4,7 +4,7 @@ This repository contains Python 2.7 scripts for checking the state of the Intel 
 
 ## Manufacturing Mode
 
-Intel ME has a Manufacturing Mode designed to be used exclusively by motherboard manufacturers. This mode provides some additional opportunities that an attacker can take advantage of. When Manufacturing Mode is enabled, Intel ME allows execution of the command which makes the ME region writable via the SPI controller built into the motherboard. The ability to run code and send commands to Intel ME on the attacked system allows the attacker to rewrite the Intel ME firmware onto another version. So the attacker is able to deploy the firmware which is vulnerable to [INTEL-SA-00086][7] and execute arbitrary code on Intel ME even if the system is patched.
+Intel ME has a Manufacturing Mode designed to be used exclusively by motherboard manufacturers. This mode provides some additional opportunities that an attacker can take advantage of. When Manufacturing Mode is enabled, Intel ME allows execution of the command which makes the ME region writable via the SPI controller built into the motherboard. The ability to run code and send commands to Intel ME on the attacked system allows the attacker to rewrite the Intel ME firmware onto another version. So the attacker is able to deploy the firmware ([full disclosure][9]) which is vulnerable to [INTEL-SA-00086][7] and execute arbitrary code on Intel ME even if the system is patched.
 
 ## Usage
 
@@ -31,6 +31,8 @@ Intel ME has a Manufacturing Mode designed to be used exclusively by motherboard
 
 [CVE-2018-4251 (MacOS High Sierra 10.13.5, Security Update)][8]
 
+[Intel ME Manufacturing Mode: obscured dangers and their relationship to Apple MacBook vulnerability CVE-2018-4251][9]
+
 ## Author
 
 Maxim Goryachy ([@h0t_max][3])
@@ -54,3 +56,4 @@ This software is provided under a custom License. See the accompanying LICENSE f
 [6]: https://eternallybored.org/misc/pciutils/
 [7]: https://www.intel.com/content/www/us/en/security-center/advisory/intel-sa-00086.html
 [8]: https://support.apple.com/en-ca/HT208849
+[9]: http://blog.ptsecurity.com/2018/10/intel-me-manufacturing-mode-macbook.html
